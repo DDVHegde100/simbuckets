@@ -7,7 +7,7 @@ import math
 
 pygame.init()
 screen = pygame.display.set_mode((config.WINDOW_WIDTH, config.WINDOW_HEIGHT))
-pygame.display.set_caption("SimBuckets: Halfcourt Basketball Sim")
+pygame.display.set_caption("SimBuckets: Halfcourt Sim")
 clock = pygame.time.Clock()
 
 player = Player(config.WINDOW_WIDTH // 2, config.WINDOW_HEIGHT // 2)
@@ -29,37 +29,34 @@ while running:
                 charging_shot = True
         elif event.type == pygame.KEYUP:
             if event.key == pygame.K_SPACE and charging_shot:
-                # Fire ball
-                mouse_x, mouse_y = pygame.mouse.get_pos()
-                dx = mouse_x - player.x
-                dy = mouse_y - player.y
-                distance = math.hypot(dx, dy)
-                if distance != 0:
-                    dx /= distance
-                    dy /= distance
-                ball.velocity_x = dx * shot_power
-                ball.velocity_y = dy * shot_power
+                rad = math.radians(player.angle)
+                ball.velocity_x = math.cos(rad) * shot_power
+                ball.velocity_y = math.sin(rad) * shot_power
+                ball.velocity_z = shot_power / 2
                 ball.moving = True
                 charging_shot = False
                 shot_power = 0
 
-    # Player movement
     player.move(keys)
+    player.adjust_angle(keys)
     ball.update(player)
 
-    # Charging power
     if charging_shot:
-        shot_power += 0.1
-        shot_power = min(shot_power, 10)
+        shot_power += 0.25
+        shot_power = min(shot_power, 15)
 
-    # Draw everything
     draw_court(screen)
     player.draw(screen)
     ball.draw(screen)
 
-    # Draw aiming arrow
-    mouse_x, mouse_y = pygame.mouse.get_pos()
-    pygame.draw.line(screen, (255, 0, 0), (player.x, player.y), (mouse_x, mouse_y), 2)
+    # Draw dotted aim line
+    if charging_shot:
+        rad = math.radians(player.angle)
+        start_x, start_y = player.x, player.y
+        for i in range(1, 20):
+            dot_x = start_x + math.cos(rad) * i * 10
+            dot_y = start_y + math.sin(rad) * i * 10
+            pygame.draw.circle(screen, (200, 0, 0), (int(dot_x), int(dot_y)), 3)
 
     pygame.display.flip()
 
