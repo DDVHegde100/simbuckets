@@ -1,5 +1,3 @@
-# court.py
-
 import pygame
 import config
 import math
@@ -39,19 +37,15 @@ def draw_court(screen):
         (center_x - arc_radius, hoop_y - arc_radius, 2 * arc_radius, 2 * arc_radius),
         math.pi, 0, 3
     )
-    # 3-point line corner side lines (short horizontal segments)
+
+    # Vertical corner three side lines from top baseline down to arc ends
     left_corner_x = center_x - arc_radius
     right_corner_x = center_x + arc_radius
-    arc_bottom_y = hoop_y + arc_radius
+    arc_top_y = hoop_y + arc_radius
+    top_baseline_y = margin
 
-    # Length of the short side lines (say 30 pixels)
-    side_line_length = 30
-
-    # Draw left horizontal line to sideline
-    pygame.draw.line(screen, config.LINE_COLOR, (left_corner_x, arc_bottom_y), (left_corner_x - side_line_length, arc_bottom_y), 3)
-
-    # Draw right horizontal line to sideline
-    pygame.draw.line(screen, config.LINE_COLOR, (right_corner_x, arc_bottom_y), (right_corner_x + side_line_length, arc_bottom_y), 3)
+    pygame.draw.line(screen, config.LINE_COLOR, (left_corner_x, top_baseline_y), (left_corner_x, arc_top_y), 3)
+    pygame.draw.line(screen, config.LINE_COLOR, (right_corner_x, top_baseline_y), (right_corner_x, arc_top_y), 3)
 
     # Baseline (bottom)
     pygame.draw.line(screen, config.LINE_COLOR, (margin, height - margin), (width - margin, height - margin), 3)
