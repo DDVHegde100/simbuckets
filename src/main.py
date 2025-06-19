@@ -30,13 +30,27 @@ while running:
         elif event.type == pygame.KEYUP:
             if event.key == pygame.K_SPACE and charging_shot:
                 rad = math.radians(player.angle)
-                ball.velocity_x = math.cos(rad) * shot_power
-                ball.velocity_y = math.sin(rad) * shot_power
-                ball.velocity_z = shot_power / 2
-                ball.moving = True
-                ball.in_possession = False
-                charging_shot = False
-                shot_power = 0
+                if ball.in_possession:
+                    ball.velocity_x = math.cos(rad) * shot_power
+                    ball.velocity_y = math.sin(rad) * shot_power
+                    ball.velocity_z = shot_power / 2
+                    # Determine shot type based on player's distance from hoop
+                    distance_from_hoop = math.hypot(player.x - config.WINDOW_WIDTH // 2, player.y - (config.COURT_MARGIN + 60))
+
+                    if distance_from_hoop < 70:
+                        shot_type = "1PT"
+                    elif distance_from_hoop < 160:
+                        shot_type = "2PT"
+                    else:
+                        shot_type = "3PT"
+
+                    print(f"Shot attempted: {shot_type} from {int(distance_from_hoop)} pixels")
+
+                    ball.moving = True
+                    ball.in_possession = False
+                    charging_shot = False
+                    shot_power = 0
+
 
     player.move(keys)
     player.adjust_angle(keys)
