@@ -18,14 +18,14 @@ charging_shot = False
 
 running = True
 while running:
-    clock.tick(60)
+    clock.tick(config.FPS)
     keys = pygame.key.get_pressed()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
+            if event.key == pygame.K_SPACE and ball.in_possession:
                 charging_shot = True
         elif event.type == pygame.KEYUP:
             if event.key == pygame.K_SPACE and charging_shot:
@@ -34,6 +34,7 @@ while running:
                 ball.velocity_y = math.sin(rad) * shot_power
                 ball.velocity_z = shot_power / 2
                 ball.moving = True
+                ball.in_possession = False
                 charging_shot = False
                 shot_power = 0
 
@@ -49,13 +50,18 @@ while running:
     player.draw(screen)
     ball.draw(screen)
 
-    # Draw dotted aim line
+    # Always draw aiming arrow
+    rad = math.radians(player.angle)
+    arrow_len = 40
+    end_x = player.x + math.cos(rad) * arrow_len
+    end_y = player.y + math.sin(rad) * arrow_len
+    pygame.draw.line(screen, (255, 0, 0), (player.x, player.y), (end_x, end_y), 3)
+
+    # If charging, draw dotted power line
     if charging_shot:
-        rad = math.radians(player.angle)
-        start_x, start_y = player.x, player.y
-        for i in range(1, 20):
-            dot_x = start_x + math.cos(rad) * i * 10
-            dot_y = start_y + math.sin(rad) * i * 10
+        for i in range(1, int(shot_power) * 2):
+            dot_x = player.x + math.cos(rad) * i * 10
+            dot_y = player.y + math.sin(rad) * i * 10
             pygame.draw.circle(screen, (200, 0, 0), (int(dot_x), int(dot_y)), 3)
 
     pygame.display.flip()

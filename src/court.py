@@ -12,6 +12,7 @@ def draw_court(screen):
 
     # Court boundaries
     pygame.draw.rect(screen, config.LINE_COLOR, (margin, margin, width - 2 * margin, height - 2 * margin), 3)
+    backboard_y = config.BACKBOARD_TOP_Y
 
     # Backboard
     backboard_y = margin + 40

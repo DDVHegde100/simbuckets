@@ -36,9 +36,9 @@ class Player:
 
     def adjust_angle(self, keys):
         if keys[pygame.K_a]:
-            self.angle -= 1  # turn left
+            self.angle -= 3  # Faster turn
         if keys[pygame.K_d]:
-            self.angle += 1  # turn right
+            self.angle += 3
 
     def draw(self, screen):
         pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), self.radius)
