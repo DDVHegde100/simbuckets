@@ -10,11 +10,15 @@ screen = pygame.display.set_mode((config.WINDOW_WIDTH, config.WINDOW_HEIGHT))
 pygame.display.set_caption("SimBuckets: Halfcourt Sim")
 clock = pygame.time.Clock()
 
+font = pygame.font.SysFont("arial", 24)
+
 player = Player(config.WINDOW_WIDTH // 2, config.WINDOW_HEIGHT // 2)
 ball = Ball(player)
 
 shot_power = 0
 charging_shot = False
+shots_taken = 0
+shots_made = 0
 
 running = True
 while running:
@@ -34,9 +38,8 @@ while running:
                     ball.velocity_x = math.cos(rad) * shot_power
                     ball.velocity_y = math.sin(rad) * shot_power
                     ball.velocity_z = shot_power / 2
-                    # Determine shot type based on player's distance from hoop
-                    distance_from_hoop = math.hypot(player.x - config.WINDOW_WIDTH // 2, player.y - (config.COURT_MARGIN + 60))
 
+                    distance_from_hoop = math.hypot(player.x - config.WINDOW_WIDTH // 2, player.y - (config.COURT_MARGIN + 60))
                     if distance_from_hoop < 70:
                         shot_type = "1PT"
                     elif distance_from_hoop < 160:
@@ -49,12 +52,23 @@ while running:
                     ball.moving = True
                     ball.in_possession = False
                     charging_shot = False
+                    shots_taken += 1
                     shot_power = 0
-
 
     player.move(keys)
     player.adjust_angle(keys)
     ball.update(player)
+
+    # Check for made shot
+    if ball.is_made_shot():
+        shots_made += 1
+        print("Shot made!")
+        ball.in_possession = True
+        ball.moving = False
+        ball.z = 0
+        ball.velocity_x = ball.velocity_y = ball.velocity_z = 0
+        ball.x = config.WINDOW_WIDTH // 2
+        ball.y = config.WINDOW_HEIGHT // 2 + 100
 
     if charging_shot:
         shot_power += 0.25
@@ -64,19 +78,21 @@ while running:
     player.draw(screen)
     ball.draw(screen)
 
-    # Always draw aiming arrow
     rad = math.radians(player.angle)
     arrow_len = 40
     end_x = player.x + math.cos(rad) * arrow_len
     end_y = player.y + math.sin(rad) * arrow_len
     pygame.draw.line(screen, (255, 0, 0), (player.x, player.y), (end_x, end_y), 3)
 
-    # If charging, draw dotted power line
     if charging_shot:
         for i in range(1, int(shot_power) * 2):
             dot_x = player.x + math.cos(rad) * i * 10
             dot_y = player.y + math.sin(rad) * i * 10
             pygame.draw.circle(screen, (200, 0, 0), (int(dot_x), int(dot_y)), 3)
+
+    # Draw scoreboard
+    score_text = font.render(f"{shots_made} / {shots_taken}", True, config.BLACK)
+    screen.blit(score_text, (config.SCOREBOARD_X, config.SCOREBOARD_Y))
 
     pygame.display.flip()
 

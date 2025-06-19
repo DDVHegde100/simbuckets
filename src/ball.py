@@ -32,14 +32,15 @@ class Ball:
 
             # Rebound off backboard
             if (config.BACKBOARD_LEFT_X <= self.x <= config.BACKBOARD_RIGHT_X) and self.y - self.radius <= config.BACKBOARD_TOP_Y:
-                self.velocity_y *= -0.8  # reverse & dampen
+                self.velocity_y *= -0.8
                 self.y = config.BACKBOARD_TOP_Y + self.radius
 
             # Ball hits ground
             if self.z < 0:
                 self.z = 0
                 self.velocity_z = 0
-            # Rim collision (simple circular bounce)
+
+            # Rim collision
             rim_x = config.WINDOW_WIDTH // 2
             rim_y = config.COURT_MARGIN + 60
             rim_radius = config.BASKET_RADIUS
@@ -49,25 +50,22 @@ class Ball:
                 dy = self.y - rim_y
                 dist = math.hypot(dx, dy)
                 if dist == 0:
-                    dist = 0.1  # avoid division by zero
+                    dist = 0.1
                 nx = dx / dist
                 ny = dy / dist
 
-                # Reflect velocity
                 dot = self.velocity_x * nx + self.velocity_y * ny
                 self.velocity_x -= 2 * dot * nx
                 self.velocity_y -= 2 * dot * ny
 
-                # Dampen slightly
                 self.velocity_x *= 0.8
                 self.velocity_y *= 0.8
 
-                # Move ball just outside rim
                 overlap = self.radius + rim_radius - dist
                 self.x += nx * overlap
                 self.y += ny * overlap
 
-            # Out of bounds check
+            # Out of bounds
             if not (config.COURT_MARGIN <= self.x <= config.WINDOW_WIDTH - config.COURT_MARGIN and
                     config.COURT_MARGIN <= self.y <= config.WINDOW_HEIGHT - config.COURT_MARGIN):
                 self.x = config.WINDOW_WIDTH // 2
@@ -79,11 +77,22 @@ class Ball:
                 self.moving = False
                 self.in_possession = True
 
-
-            # Check if player recovers ball
+            # Player recovers ball
             if math.hypot(player.x - self.x, player.y - self.y) <= self.radius + player.radius:
                 self.in_possession = True
                 self.moving = False
+
+    def is_made_shot(self):
+        """Return True if ball passes through hoop (rim) while falling."""
+        rim_x = config.WINDOW_WIDTH // 2
+        rim_y = config.COURT_MARGIN + 60
+        rim_radius = config.BASKET_RADIUS
+
+        if (self.z <= 0 and
+            math.hypot(self.x - rim_x, self.y - rim_y) <= rim_radius and
+            not self.in_possession):
+            return True
+        return False
 
     def draw(self, screen):
         brightness = max(50, min(255, int(255 - self.z * 5)))
