@@ -24,7 +24,7 @@ class Player:
         glPopMatrix()
 
     def draw_cube(self, size):
-        hs = size / 2  # half size
+        hs = size / 2 
         vertices = [
             [-hs, -hs, -hs],
             [ hs, -hs, -hs],

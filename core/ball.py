@@ -8,7 +8,7 @@ class Ball:
         self.size = 0.25
 
     def update(self, player):
-        pass  # Will implement in Phase 2
+        pass 
 
     def draw(self):
         glPushMatrix()
