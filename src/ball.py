@@ -12,14 +12,17 @@ class Ball:
         self.velocity_y = 0
         self.velocity_z = 0
         self.z = 0
+        self.prev_z = 0
         self.gravity = -0.3
         self.moving = False
         self.in_possession = True
+        self.made_shot = False
 
     def update(self, player):
         if self.in_possession:
             self.x = player.x
             self.y = player.y
+            self.prev_z = self.z
             self.z = 0
         else:
             self.x += self.velocity_x
@@ -30,7 +33,19 @@ class Ball:
             self.velocity_y *= 0.99
             self.velocity_z += self.gravity
 
-            # Rebound off backboard
+
+            # Check for made shot crossing hoop plane
+            rim_x = config.WINDOW_WIDTH // 2
+            rim_y = config.COURT_MARGIN + 60
+            rim_radius = config.BASKET_RADIUS
+
+            if (self.prev_z > 0 and self.z <= 0 and
+                math.hypot(self.x - rim_x, self.y - rim_y) <= rim_radius and
+                not self.in_possession):
+                self.made_shot = True
+            else:
+                self.made_shot = False
+
             if (config.BACKBOARD_LEFT_X <= self.x <= config.BACKBOARD_RIGHT_X) and self.y - self.radius <= config.BACKBOARD_TOP_Y:
                 self.velocity_y *= -0.8
                 self.y = config.BACKBOARD_TOP_Y + self.radius
@@ -83,16 +98,7 @@ class Ball:
                 self.moving = False
 
     def is_made_shot(self):
-        """Return True if ball passes through hoop (rim) while falling."""
-        rim_x = config.WINDOW_WIDTH // 2
-        rim_y = config.COURT_MARGIN + 60
-        rim_radius = config.BASKET_RADIUS
-
-        if (self.z <= 0 and
-            math.hypot(self.x - rim_x, self.y - rim_y) <= rim_radius and
-            not self.in_possession):
-            return True
-        return False
+        return self.made_shot
 
     def draw(self, screen):
         brightness = max(50, min(255, int(255 - self.z * 5)))
